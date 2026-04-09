@@ -6,35 +6,6 @@ Built with: FastAPI · ChromaDB · sentence-transformers · Groq · React · Vit
 
 ---
 
-## Project Structure
-
-```
-knowledge-agent/
-├── backend/
-│   ├── main.py          # FastAPI app — all API routes
-│   ├── ingestion.py     # PDF parse → chunk → embed → store
-│   ├── retrieval.py     # Semantic search against ChromaDB
-│   ├── generation.py    # Prompt builder + Groq LLM call
-│   ├── requirements.txt
-│   └── .env.example
-└── frontend/
-    ├── src/
-    │   ├── App.jsx
-    │   ├── api.js              # fetch wrappers for all endpoints
-    │   ├── hooks/
-    │   │   ├── useDocuments.js # upload / delete / list state
-    │   │   └── useChat.js      # chat message state
-    │   └── components/
-    │       ├── Sidebar.jsx     # doc list + PDF upload drop zone
-    │       ├── ChatWindow.jsx  # main Q&A interface
-    │       ├── ChatMessage.jsx # single message bubble
-    │       └── SourceCard.jsx  # expandable source passage
-    ├── index.html
-    └── vite.config.js
-```
-
----
-
 ## Setup
 
 ### 1. Get a Groq API key
