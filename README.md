@@ -81,6 +81,7 @@ User question
 
 ## What to Build Next (v2)
 
+- [ ] Migrating to pure typescript with UI Libraries on top of tailwindcss
 - [ ] Google Drive / Notion sync (connect real team docs)
 - [ ] Slack bot interface (`/ask` command)  
 - [ ] RAGAS evaluation — hallucination rate, answer relevance
