@@ -1,19 +1,22 @@
-import Sidebar from './components/Sidebar'
-import ChatWindow from './components/ChatWindow'
-import { useDocuments } from './hooks/useDocuments'
-import { useChat } from './hooks/useChat'
+import Sidebar from "./components/Sidebar";
+import ChatWindow from "./components/ChatWindow";
+import { useDocuments } from "./hooks/useDocuments";
+import { useChat } from "./hooks/useChat";
 
 export default function App() {
-  const { documents, loading, uploading, error, load, upload, remove } = useDocuments()
-  const { messages, thinking, ask, clear } = useChat()
+  const { documents, loading, uploading, error, load, upload, remove } =
+    useDocuments();
+  const { messages, thinking, streaming, ask, clear } = useChat();
 
   return (
-    <div style={{
-      display: 'flex',
-      height: '100vh',
-      overflow: 'hidden',
-      background: 'var(--bg)',
-    }}>
+    <div
+      style={{
+        display: "flex",
+        height: "100vh",
+        overflow: "hidden",
+        background: "var(--bg)",
+      }}
+    >
       <Sidebar
         documents={documents}
         loading={loading}
@@ -25,10 +28,11 @@ export default function App() {
       <ChatWindow
         messages={messages}
         thinking={thinking}
+        streaming={streaming}
         onAsk={ask}
         onClear={clear}
         docCount={documents.length}
       />
     </div>
-  )
+  );
 }

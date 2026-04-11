@@ -1,4 +1,5 @@
 import os
+import json
 from groq import Groq
 from dotenv import load_dotenv
 
@@ -50,3 +51,59 @@ def generate_answer(question: str, chunks: list[dict]) -> str:
     )
 
     return response.choices[0].message.content.strip()
+
+
+def stream_answer(question: str, chunks: list[dict]):
+    """
+    Generator that yields SSE-formatted strings token by token.
+ 
+    SSE format the browser expects:
+        data: {"type": "token", "text": "Hello"}\n\n
+        data: {"type": "sources", "sources": [...]}\n\n
+        data: {"type": "done"}\n\n
+ 
+    Why send sources first then tokens?
+    We retrieve chunks BEFORE calling the LLM, so we already have
+    the sources. We send them immediately so the UI can show source
+    cards while the answer is still streaming in.
+    """
+    if not chunks:
+        yield f"data: {json.dumps({'type': 'token', 'text': 'I could not find relevant information in the uploaded documents.'})}\n\n"
+        yield f"data: {json.dumps({'type': 'done'})}\n\n"
+        return
+ 
+    # Send sources immediately — before any tokens arrive
+    sources = [
+        {
+            "filename": c["filename"],
+            "preview": c["text"][:200] + ("..." if len(c["text"]) > 200 else ""),
+            "score": c["score"],
+            "doc_id": c["doc_id"],
+            "chunk_index": c["chunk_index"],
+        }
+        for c in chunks
+    ]
+    yield f"data: {json.dumps({'type': 'sources', 'sources': sources})}\n\n"
+ 
+    # Stream tokens from Groq
+    client = get_client()
+    user_message = build_prompt(question, chunks)
+ 
+    # stream=True tells Groq to send tokens as they're generated
+    stream = client.chat.completions.create(
+        model="llama-3.1-8b-instant",
+        messages=[
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": user_message},
+        ],
+        temperature=0.2,
+        max_tokens=1024,
+        stream=True,          # ← the only change from generate_answer
+    )
+ 
+    for chunk in stream:
+        token = chunk.choices[0].delta.content
+        if token:             # delta can be None on the last chunk
+            yield f"data: {json.dumps({'type': 'token', 'text': token})}\n\n"
+ 
+    yield f"data: {json.dumps({'type': 'done'})}\n\n"
