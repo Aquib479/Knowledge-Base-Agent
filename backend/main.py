@@ -1,9 +1,10 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from ingestion import ingest_document, delete_document, list_documents
 from retrieval import retrieve
-from generation import generate_answer
+from generation import generate_answer, stream_answer
 
 app = FastAPI(title="Knowledge Base Agent API", version="1.0.0")
 
@@ -78,6 +79,37 @@ async def ask_questions(request: AskRequest):
     ]
 
     return AskResponse(answer=answer, sources=sources)
+
+
+@app.post("/ask/stream")
+async def ask_stream(body: AskRequest):
+    """
+    Streaming version of /ask.
+    Returns a text/event-stream response — the browser receives
+    tokens one by one as the LLM generates them.
+ 
+    SSE event sequence:
+      1. {type: "sources", sources: [...]}  — sent immediately
+      2. {type: "token",   text: "..."}     — one per LLM token
+      3. {type: "done"}                     — signals stream end
+    """
+    if not body.question.strip():
+        raise HTTPException(status_code=400, detail="Question cannot be empty.")
+ 
+    try:
+        chunks = retrieve(body.question, top_k=body.top_k)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+ 
+    return StreamingResponse(
+        stream_answer(body.question, chunks),
+        media_type="text/event-stream",
+        headers={
+            # Prevent nginx / any proxy from buffering the stream
+            "X-Accel-Buffering": "no",
+            "Cache-Control": "no-cache",
+        },
+    )
 
 
 @app.get("/documents")
