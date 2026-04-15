@@ -1,4 +1,5 @@
 import SourceCard from "./SourceCard";
+import ConfidenceBadge from "./ConfidenceBadge";
 
 export default function ChatMessage({ message, index, isStreaming }) {
   const isUser = message.role === "user";
@@ -30,6 +31,10 @@ export default function ChatMessage({ message, index, isStreaming }) {
       >
         {isUser ? "YOU" : isError ? "ERROR" : "AGENT"}
       </span>
+
+      {!isUser && !isError && (
+        <ConfidenceBadge confidence={message.confidence} />
+      )}
 
       {/* Bubble */}
       <div
