@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import ThreadList from "./ThreadList";
 
 export default function Sidebar({
   documents,
@@ -7,10 +8,17 @@ export default function Sidebar({
   onUpload,
   onDelete,
   onLoad,
+  threads,
+  currentThreadId,
+  onSelectThread,
+  onDeleteThread,
+  onNewThread,
+  onUpdateThreadTitle,
 }) {
   const fileRef = useRef(null);
   const [dragging, setDragging] = useState(false);
   const [toast, setToast] = useState(null);
+  const [activeTab, setActiveTab] = useState("threads"); // "threads" or "documents"
 
   useEffect(() => {
     onLoad();
@@ -91,127 +99,203 @@ export default function Sidebar({
             fontSize: 20,
             color: "var(--text)",
             fontStyle: "italic",
+            margin: 0,
+            marginTop: 4,
           }}
         >
-          Your Docs
+          Your Space
         </p>
       </div>
 
-      {/* Drop zone */}
+      {/* Tabs */}
       <div
-        onDragOver={(e) => {
-          e.preventDefault();
-          setDragging(true);
-        }}
-        onDragLeave={() => setDragging(false)}
-        onDrop={onDrop}
-        onClick={() => fileRef.current?.click()}
         style={{
-          margin: "16px 16px 12px",
-          border: `1px dashed ${dragging ? "var(--accent)" : "var(--border-2)"}`,
-          borderRadius: 8,
-          padding: "18px 12px",
-          textAlign: "center",
-          cursor: "pointer",
-          background: dragging ? "var(--accent-glow)" : "transparent",
-          transition: "all 0.2s",
+          display: "flex",
+          borderBottom: "1px solid var(--border)",
+          padding: "0 12px",
+          gap: 0,
         }}
       >
-        <input
-          ref={fileRef}
-          type="file"
-          accept=".pdf"
-          multiple
-          style={{ display: "none" }}
-          onChange={(e) => handleFiles(e.target.files)}
-        />
-        {uploading ? (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 8,
-            }}
-          >
-            <div
-              style={{
-                width: 14,
-                height: 14,
-                border: "2px solid var(--border-2)",
-                borderTopColor: "var(--accent)",
-                borderRadius: "50%",
-                animation: "spin-slow 0.8s linear infinite",
-              }}
-            />
-            <span
-              style={{
-                fontSize: 12,
-                color: "var(--text-2)",
-                fontFamily: "DM Mono",
-              }}
-            >
-              indexing...
-            </span>
-          </div>
-        ) : (
-          <>
-            <div style={{ fontSize: 20, marginBottom: 6 }}>⊕</div>
-            <p
-              style={{
-                fontSize: 12,
-                color: "var(--text-2)",
-                fontFamily: "DM Mono",
-                lineHeight: 1.5,
-              }}
-            >
-              drop PDFs here
-              <br />
-              <span style={{ color: "var(--text-3)" }}>or click to browse</span>
-            </p>
-          </>
-        )}
+        <button
+          onClick={() => setActiveTab("threads")}
+          style={{
+            flex: 1,
+            padding: "12px",
+            background: "transparent",
+            border: "none",
+            color: activeTab === "threads" ? "var(--text)" : "var(--text-3)",
+            fontSize: 12,
+            fontFamily: "DM Sans",
+            fontWeight: activeTab === "threads" ? "500" : "400",
+            cursor: "pointer",
+            borderBottom:
+              activeTab === "threads" ? "2px solid var(--accent)" : "none",
+            marginBottom: "-1px",
+            transition: "all 0.2s",
+          }}
+        >
+          Chats
+        </button>
+        <button
+          onClick={() => setActiveTab("documents")}
+          style={{
+            flex: 1,
+            padding: "12px",
+            background: "transparent",
+            border: "none",
+            color: activeTab === "documents" ? "var(--text)" : "var(--text-3)",
+            fontSize: 12,
+            fontFamily: "DM Sans",
+            fontWeight: activeTab === "documents" ? "500" : "400",
+            cursor: "pointer",
+            borderBottom:
+              activeTab === "documents" ? "2px solid var(--accent)" : "none",
+            marginBottom: "-1px",
+            transition: "all 0.2s",
+          }}
+        >
+          Docs
+        </button>
       </div>
 
-      {/* Doc list */}
-      <div style={{ flex: 1, overflowY: "auto", padding: "0 12px 12px" }}>
-        {loading && (
-          <div style={{ padding: "12px 8px" }}>
-            {[1, 2, 3].map((i) => (
+      {/* Content based on active tab */}
+      {activeTab === "threads" ? (
+        <ThreadList
+          threads={threads}
+          currentThreadId={currentThreadId}
+          onSelectThread={onSelectThread}
+          onDeleteThread={onDeleteThread}
+          onNewThread={onNewThread}
+          onUpdateTitle={onUpdateThreadTitle}
+        />
+      ) : (
+        <>
+          {/* Drop zone */}
+          <div
+            onDragOver={(e) => {
+              e.preventDefault();
+              setDragging(true);
+            }}
+            onDragLeave={() => setDragging(false)}
+            onDrop={onDrop}
+            onClick={() => fileRef.current?.click()}
+            style={{
+              margin: "16px 16px 12px",
+              border: `1px dashed ${dragging ? "var(--accent)" : "var(--border-2)"}`,
+              borderRadius: 8,
+              padding: "18px 12px",
+              textAlign: "center",
+              cursor: "pointer",
+              background: dragging ? "var(--accent-glow)" : "transparent",
+              transition: "all 0.2s",
+            }}
+          >
+            <input
+              ref={fileRef}
+              type="file"
+              accept=".pdf"
+              multiple
+              style={{ display: "none" }}
+              onChange={(e) => handleFiles(e.target.files)}
+            />
+            {uploading ? (
               <div
-                key={i}
                 style={{
-                  height: 44,
-                  borderRadius: 6,
-                  marginBottom: 8,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8,
                 }}
-                className="shimmer"
+              >
+                <div
+                  style={{
+                    width: 14,
+                    height: 14,
+                    border: "2px solid var(--border-2)",
+                    borderTopColor: "var(--accent)",
+                    borderRadius: "50%",
+                    animation: "spin-slow 0.8s linear infinite",
+                  }}
+                />
+                <span
+                  style={{
+                    fontSize: 12,
+                    color: "var(--text-2)",
+                    fontFamily: "DM Mono",
+                  }}
+                >
+                  indexing...
+                </span>
+              </div>
+            ) : (
+              <>
+                <div style={{ fontSize: 20, marginBottom: 6 }}>⊕</div>
+                <p
+                  style={{
+                    fontSize: 12,
+                    color: "var(--text-2)",
+                    fontFamily: "DM Mono",
+                    lineHeight: 1.5,
+                    margin: 0,
+                  }}
+                >
+                  drop PDFs here
+                  <br />
+                  <span style={{ color: "var(--text-3)" }}>
+                    or click to browse
+                  </span>
+                </p>
+              </>
+            )}
+          </div>
+
+          {/* Doc list */}
+          <div style={{ flex: 1, overflowY: "auto", padding: "0 12px 12px" }}>
+            {loading && (
+              <div style={{ padding: "12px 8px" }}>
+                {[1, 2, 3].map((i) => (
+                  <div
+                    key={i}
+                    style={{
+                      height: 44,
+                      borderRadius: 6,
+                      marginBottom: 8,
+                    }}
+                    className="shimmer"
+                  />
+                ))}
+              </div>
+            )}
+
+            {!loading && documents.length === 0 && (
+              <div style={{ padding: "24px 8px", textAlign: "center" }}>
+                <p
+                  style={{
+                    fontSize: 12,
+                    color: "var(--text-3)",
+                    fontFamily: "DM Mono",
+                    lineHeight: 1.8,
+                    margin: 0,
+                  }}
+                >
+                  no documents yet
+                  <br />
+                  upload a PDF to begin
+                </p>
+              </div>
+            )}
+
+            {documents.map((doc, i) => (
+              <DocRow
+                key={doc.doc_id}
+                doc={doc}
+                index={i}
+                onDelete={onDelete}
               />
             ))}
           </div>
-        )}
-
-        {!loading && documents.length === 0 && (
-          <div style={{ padding: "24px 8px", textAlign: "center" }}>
-            <p
-              style={{
-                fontSize: 12,
-                color: "var(--text-3)",
-                fontFamily: "DM Mono",
-                lineHeight: 1.8,
-              }}
-            >
-              no documents yet
-              <br />
-              upload a PDF to begin
-            </p>
-          </div>
-        )}
-
-        {documents.map((doc, i) => (
-          <DocRow key={doc.doc_id} doc={doc} index={i} onDelete={onDelete} />
-        ))}
-      </div>
+        </>
+      )}
 
       {/* Toast */}
       {toast && (

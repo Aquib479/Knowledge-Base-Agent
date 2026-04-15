@@ -80,27 +80,47 @@ export default function SourceCard({ source, index }) {
             {source.filename}
           </span>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          {reranked && biScore != null && (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            flexShrink: 0,
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            {reranked && biScore != null && (
+              <span
+                style={{
+                  fontSize: 9,
+                  fontFamily: "DM Mono",
+                  color: "var(--text-3)",
+                  textDecoration: "line-through",
+                }}
+              >
+                {biScore}%
+              </span>
+            )}
             <span
               style={{
-                fontSize: 9,
+                fontSize: 10,
                 fontFamily: "DM Mono",
-                color: "var(--text-3)",
-                textDecoration: "line-through",
+                color: scoreColor,
               }}
             >
-              {biScore}%
+              {score}%{reranked ? " ↑" : ""}
             </span>
-          )}
+          </div>
           <span
             style={{
               fontSize: 10,
-              fontFamily: "DM Mono",
-              color: scoreColor,
+              color: "var(--text-3)",
+              transition: "transform 0.2s",
+              display: "inline-block",
+              transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
             }}
           >
-            {score}%{reranked ? " ↑" : ""}
+            ▾
           </span>
         </div>
       </div>
