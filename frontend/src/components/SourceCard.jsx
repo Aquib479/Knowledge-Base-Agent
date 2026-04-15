@@ -4,6 +4,12 @@ export default function SourceCard({ source, index }) {
   const [expanded, setExpanded] = useState(false);
   const score = Math.round(source.score * 100);
 
+  const biScore =
+    source.bi_encoder_score != null
+      ? Math.round(source.bi_encoder_score * 100)
+      : null;
+  const reranked = biScore != null && score !== biScore;
+
   const scoreColor =
     score >= 80
       ? "var(--accent)"
@@ -74,14 +80,19 @@ export default function SourceCard({ source, index }) {
             {source.filename}
           </span>
         </div>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 10,
-            flexShrink: 0,
-          }}
-        >
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          {reranked && biScore != null && (
+            <span
+              style={{
+                fontSize: 9,
+                fontFamily: "DM Mono",
+                color: "var(--text-3)",
+                textDecoration: "line-through",
+              }}
+            >
+              {biScore}%
+            </span>
+          )}
           <span
             style={{
               fontSize: 10,
@@ -89,18 +100,7 @@ export default function SourceCard({ source, index }) {
               color: scoreColor,
             }}
           >
-            {score}%
-          </span>
-          <span
-            style={{
-              fontSize: 10,
-              color: "var(--text-3)",
-              transition: "transform 0.2s",
-              display: "inline-block",
-              transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
-            }}
-          >
-            ▾
+            {score}%{reranked ? " ↑" : ""}
           </span>
         </div>
       </div>

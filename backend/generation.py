@@ -53,7 +53,7 @@ def generate_answer(question: str, chunks: list[dict]) -> str:
     return response.choices[0].message.content.strip()
 
 
-def stream_answer(question: str, chunks: list[dict]):
+def stream_answer(question: str, chunks: list[dict], confidence: dict | None = None):
     """
     Generator that yields SSE-formatted strings token by token.
  
@@ -67,6 +67,8 @@ def stream_answer(question: str, chunks: list[dict]):
     the sources. We send them immediately so the UI can show source
     cards while the answer is still streaming in.
     """
+    if confidence:
+        yield f"data: {json.dumps({'type': 'confidence', **confidence})}\n\n"
     if not chunks:
         yield f"data: {json.dumps({'type': 'token', 'text': 'I could not find relevant information in the uploaded documents.'})}\n\n"
         yield f"data: {json.dumps({'type': 'done'})}\n\n"

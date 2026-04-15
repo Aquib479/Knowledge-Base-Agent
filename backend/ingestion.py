@@ -14,8 +14,8 @@ _collection = None
 
 CHROMA_PATH = "./chroma_store"
 COLLECTION_NAME = "knowledge_base"
-CHUNK_SIZE = 800
-CHUNK_OVERLAP = 150
+CHUNK_SIZE = 400
+CHUNK_OVERLAP = 50
 
 
 def get_embedder():

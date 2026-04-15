@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import ChatMessage from "./ChatMessage";
+import EvalDashboard from "./EvalDashboard";
 
 export default function ChatWindow({
   messages,
@@ -10,6 +11,7 @@ export default function ChatWindow({
   docCount,
 }) {
   const [input, setInput] = useState("");
+  const [showEval, setShowEval] = useState(false);
   const bottomRef = useRef(null);
   const textareaRef = useRef(null);
 
@@ -78,9 +80,10 @@ export default function ChatWindow({
             {docCount} document{docCount !== 1 ? "s" : ""} indexed
           </p>
         </div>
-        {messages.length > 0 && (
+        <div style={{ display: "flex", gap: 8 }}>
+          {/* Eval button */}
           <button
-            onClick={onClear}
+            onClick={() => setShowEval(true)}
             style={{
               fontSize: 11,
               fontFamily: "DM Mono",
@@ -90,20 +93,39 @@ export default function ChatWindow({
               borderRadius: 6,
               padding: "6px 12px",
               cursor: "pointer",
-              transition: "color 0.15s, border-color 0.15s",
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.color = "var(--text)";
-              e.target.style.borderColor = "var(--border-2)";
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.color = "var(--text-3)";
-              e.target.style.borderColor = "var(--border)";
             }}
           >
-            clear chat
+            eval history
           </button>
-        )}
+
+          {/* Clear button */}
+          {messages.length > 0 && (
+            <button
+              onClick={onClear}
+              style={{
+                fontSize: 11,
+                fontFamily: "DM Mono",
+                color: "var(--text-3)",
+                background: "transparent",
+                border: "1px solid var(--border)",
+                borderRadius: 6,
+                padding: "6px 12px",
+                cursor: "pointer",
+                transition: "color 0.15s, border-color 0.15s",
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.color = "var(--text)";
+                e.target.style.borderColor = "var(--border-2)";
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.color = "var(--text-3)";
+                e.target.style.borderColor = "var(--border)";
+              }}
+            >
+              clear chat
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Messages */}
@@ -128,6 +150,8 @@ export default function ChatWindow({
         </div>
 
         <div ref={bottomRef} />
+
+        {showEval && <EvalDashboard onClose={() => setShowEval(false)} />}
       </div>
 
       {/* Input area */}

@@ -34,6 +34,13 @@ export function useChat() {
       await askStream(question, {
         signal: controller.signal,
 
+        // Called first — confidence from retrieval scores
+        onConfidence: (confidence) => {
+          setMessages((prev) =>
+            prev.map((m) => (m.id === assistantId ? { ...m, confidence } : m)),
+          );
+        },
+
         // Called once — sources arrive before the first token
         onSources: (sources) => {
           setMessages((prev) =>

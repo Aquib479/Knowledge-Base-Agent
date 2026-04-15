@@ -35,12 +35,13 @@ export async function askQuestion(question, top_k = 5) {
  *
  * @param {string} question
  * @param {function} onToken   - called with each text token string
+ * @param {function} onConfidence
  * @param {function} onSources - called once with the sources array
  * @param {AbortSignal} signal - pass an AbortController signal to cancel mid-stream
  */
 export async function askStream(
   question,
-  { onToken, onSources, signal, top_k = 5 } = {},
+  { onToken, onConfidence, onSources, signal, top_k = 5 } = {},
 ) {
   const res = await fetch(`${BASE}/ask/stream`, {
     method: "POST",
@@ -79,7 +80,13 @@ export async function askStream(
       try {
         const payload = JSON.parse(line.slice(6)); // strip "data: "
 
-        if (payload.type === "token" && onToken) {
+        if (payload.type === "confidence" && onConfidence) {
+          onConfidence({
+            score: payload.score,
+            label: payload.label,
+            reason: payload.reason,
+          });
+        } else if (payload.type === "token" && onToken) {
           onToken(payload.text);
         } else if (payload.type === "sources" && onSources) {
           onSources(payload.sources);
